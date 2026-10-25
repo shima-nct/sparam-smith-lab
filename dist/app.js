@@ -74,6 +74,12 @@ function circuit(){
  const blocks=elements.map(e=>`<div class="circuit-block ${e.connection}">${e.kind} ${e.value} ${e.kind==='R'?'Ω':e.kind==='L'?'nH':'pF'}<small>${e.connection==='series'?'直列':'並列 / 接地'}</small></div>`).join('<span class="wire"></span>');
  $('circuit').innerHTML=start+(mode==='line'?line:blocks||'<div class="circuit-block">直結</div>')+`<span class="wire"></span><div class="port"><b>PORT 2</b>b₂ → / ← a₂</div><div class="circuit-load">→ Z<sub>L</sub><br>${params.load==='open'?'開放':params.load==='short'?'短絡':fmt(c(params.rl,params.xl))+' Ω'}</div>`;
  $('electrical').textContent=mode==='line'?`βl = ${n(360*num('freq')*1e9*params.length/params.vp,1)}°`:`${elements.length} ELEMENTS`;
+ $('wave-conditions').hidden=mode!=='line';
+ if(mode==='line'){
+  const wavelength=params.vp/(num('freq')*1e9);
+  const quarter=params.length>0?`この線路長が四分の一波長となる周波数は <i>f</i><sub>0</sub> = <i>v</i><sub>p</sub>/(4<i>l</i>) = <strong>${Number((params.vp/(4*params.length)/1e9).toPrecision(5))} GHz</strong> です。`:'線路長が0のため、四分の一波長となる周波数はありません。';
+  $('wave-conditions').innerHTML=`<h3>線路内の波長と四分の一波長の条件</h3><p><i>λ</i><sub>g</sub> は、この線路（変成器内）を伝わる波の波長です。<i>λ</i><sub>g</sub> = <i>v</i><sub>p</sub>/<i>f</i> = 2π/<i>β</i>。位相速度は左の「位相速度 <i>v</i><sub>p</sub>」を使います。</p><p>現在：<i>f</i> = ${num('freq')} GHz、<i>v</i><sub>p</sub> = ${num('vp')} × 10⁸ m/s → <strong><i>λ</i><sub>g</sub> = ${n(wavelength*1000)} mm</strong>、<i>l</i> = ${n(params.length/wavelength,4)} <i>λ</i><sub>g</sub>。${quarter}</p><p>抵抗負荷を整合する変成器の設計条件：<i>l</i> = <i>v</i><sub>p</sub>/(4<i>f</i><sub>0</sub>)、<i>α</i> = 0、<i>Z</i><sub>L</sub> = <i>R</i><sub>L</sub> &gt; 0、<i>Z</i><sub>0</sub> = <i>Z</i><sub>t</sub> = √(<i>Z</i><sub>ref</sub><i>R</i><sub>L</sub>)。<i>Z</i><sub>t</sub> は変成器の特性インピーダンスです。整合は「<i>Γ</i><sub>in</sub>：指定負荷での入力反射」で確認します。</p>`;
+ }
 }
 function numbers(){
  $('matrix').innerHTML=['s11','s12','s21','s22'].map(k=>`<div class="matrix-cell"><b>${names[k]}</b><strong>${n(abs(current[k]),5)} ∠ ${phaseText(current[k])}</strong><small>${dbText(current[k])} · ${fmt(current[k])}</small></div>`).join('');
